@@ -19,7 +19,18 @@ function Platform::can_attach (tile_index)
 {
     local dir = AIRail.GetRailStationDirection(tile_index);
 
-    return dir == this.orientation;
+    foreach (i, tile in this.tiles)
+    {
+        local platform_dir = AIRail.GetRailStationDirection(tile);
+
+        if (rail_tiles_connectable(tile, tile_index, platform_dir) &&
+            platform_dir == dir)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function Platform::attach_tile (tile_index)
