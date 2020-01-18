@@ -1,6 +1,7 @@
 require("util.nut");
 require("task.nut");
 require("finance.nut");
+require("plan.nut");
 /* require("pathfinder.nut"); */
 /* require("world.nut"); */
 /* require("signs.nut"); */
@@ -29,90 +30,19 @@ enum SignalMode {
 
 class Feeder extends AIController
 {
-	function Start ()
+    plan = null;
+
+
+    function try_add_new_task (task)
     {
-		AICompany.SetAutoRenewStatus(true);
-		AICompany.SetAutoRenewMonths(0);
-		AICompany.SetAutoRenewMoney(0);
-		
-		AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
-
-		::COMPANY <- AICompany.ResolveCompanyID(
-                        AICompany.COMPANY_SELF);
-		::TICKS_PER_DAY <- 37;
-        ::SLEEP_TICKS <- 20;
-		::SIGN1 <- -1;
-		::SIGN2 <- -1;
-		::tasks <- [];
-
-		AIRail.SetCurrentRailType(AIRailTypeList().Begin());
-
-		if (AIStationList(AIStation.STATION_TRAIN).IsEmpty())         
+        if (task == null)
         {
-			tasks.push(LongLine());
-		}
+            return;
+        }
 
-		local minMoney = 0;
-		local year = 0;
-
-		while (true)
-        {
-			HandleEvents();
-			
-			if (year != AIDate.GetYear(AIDate.GetCurrentDate()))
-            {
-				/* CullTrains(); */
-				year = AIDate.GetYear(AIDate.GetCurrentDate());
-			}
-			
-			if (tasks.len() == 0)
-            {
-                Debug("nothing to do");
-                Sleep(SLEEP_TICKS);
-                continue;
-			}
-			
-			Debug("Tasks: " + ArrayToString(tasks));
-			
-			local task;
-
-			try
-            {
-				// run the next task in the queue
-				task = tasks[0];
-				Debug("Running: " + task);
-				task.run();
-				tasks.remove(0);
-			}
-            catch (e)
-            {
-				if (typeof(e) == "instance")
-                {
-					/* if (e instanceof TaskRetryException) */
-                    /* { */
-					/* 	Sleep(e.sleep); */
-					/* 	Debug("Retrying..."); */
-					/* } */
-                    /* else if (e instanceof TaskFailedException) */
-                    /* { */
-					/* 	Warning(task + " failed: " + e); */
-					/* 	tasks.remove(0); */
-					/* 	task.Failed(); */
-					/* } */
-                    /* else if (e instanceof NeedMoneyException) */
-                    /* { */
-					/* 	Debug(task + " needs £" + e.amount); */
-					/* 	minMoney = e.amount; */
-					/* } */
-				}
-                else
-                {
-					Error("Unexpected error");
-					return;
-				}
-			}
-		}
-	}
+        this.tasks.push(task);
+        Debug("new task", task);
+    }
 	
 	function WaitForMoney(amount) {
 		local reserve = GetMinimumSafeMoney();
@@ -201,5 +131,96 @@ class Feeder extends AIController
 
 	function Load(version, data)
     {}
+}
+
+function Feeder::Start ()
+{
+    this.plan = Plan();
+
+	AICompany.SetAutoRenewStatus(true);
+	AICompany.SetAutoRenewMonths(0);
+	AICompany.SetAutoRenewMoney(0);
+	
+	AIRoad.SetCurrentRoadType(AIRoad.ROADTYPE_ROAD);
+
+	::COMPANY <- AICompany.ResolveCompanyID(
+                    AICompany.COMPANY_SELF);
+	::TICKS_PER_DAY <- 37;
+    ::SLEEP_TICKS <- 5;
+	::SIGN1 <- -1;
+	::SIGN2 <- -1;
+	::tasks <- [];
+
+	AIRail.SetCurrentRailType(AIRailTypeList().Begin());
+
+	if (AIStationList(AIStation.STATION_TRAIN).IsEmpty())         
+    {
+		tasks.push(LongLine());
+	}
+
+	local minMoney = 0;
+	local year = 0;
+
+	while (true)
+    {
+		HandleEvents();
+		
+		if (year != AIDate.GetYear(AIDate.GetCurrentDate()))
+        {
+			/* CullTrains(); */
+			year = AIDate.GetYear(AIDate.GetCurrentDate());
+		}
+
+        // nothing to do	
+		if (tasks.len() == 0)
+        {
+            this.plan.find_stations();
+            this.try_add_new_task(this.plan.get_task());
+		}
+
+        // didn't find anything to do
+        if (tasks.len() == 0)
+        {
+            Sleep(SLEEP_TICKS);
+            continue;
+        }
+		
+		Debug("Tasks: " + ArrayToString(tasks));
+
+		try
+        {
+			local task = tasks[0];
+			Debug("Running: " + task);
+			task.run();
+			tasks.remove(0);
+		}
+        catch (e)
+        {
+			if (typeof(e) == "instance")
+            {
+				/* if (e instanceof TaskRetryException) */
+                /* { */
+				/* 	Sleep(e.sleep); */
+				/* 	Debug("Retrying..."); */
+				/* } */
+                /* else if (e instanceof TaskFailedException) */
+                /* { */
+				/* 	Warning(task + " failed: " + e); */
+				/* 	tasks.remove(0); */
+				/* 	task.Failed(); */
+				/* } */
+                /* else if (e instanceof NeedMoneyException) */
+                /* { */
+				/* 	Debug(task + " needs £" + e.amount); */
+				/* 	minMoney = e.amount; */
+				/* } */
+			}
+            else
+            {
+				Error("Unexpected error");
+				return;
+			}
+		}
+	}
 }
 

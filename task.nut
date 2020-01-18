@@ -12,7 +12,8 @@ class Task
 
 class LongLine extends Task
 {
-	function _tostring() {
+	function _tostring()
+    {
 		return "longline";
 	}
 	
@@ -27,13 +28,21 @@ class LongLine extends Task
 
 class FeedLine extends Task
 {
-	function _tostring() {
+    big_station = null;
+
+    constructor (big_station)
+    {
+        this.big_station = big_station;
+    }
+
+	function _tostring()
+    {
 		return "feedline";
 	}
 
 	function run ()
     {
-        Debug("building a longline");
+        Debug("building feedline for ", big_station);
 	}
 }
 
