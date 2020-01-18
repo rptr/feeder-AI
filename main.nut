@@ -2,13 +2,7 @@ require("util.nut");
 require("task.nut");
 require("finance.nut");
 require("plan.nut");
-/* require("pathfinder.nut"); */
-/* require("world.nut"); */
-/* require("signs.nut"); */
-/* require("builder.nut"); */
-/* require("planner.nut"); */
-/* require("manager.nut"); */
-/* require("vehicles.nut"); */
+require("station.nut");
 
 const MIN_DISTANCE =  30;
 const MAX_DISTANCE = 100;
