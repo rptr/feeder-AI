@@ -150,7 +150,7 @@ function Station::find_platforms ()
 }
 
 // TODO optimise
-function Station::find_cargo_types ()
+function Station::get_cargo_types ()
 {
     local all_types     = AICargoList();
     local cargo_types   = [];

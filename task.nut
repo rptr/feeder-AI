@@ -43,6 +43,13 @@ class FeedLine extends Task
 	function run ()
     {
         Debug("building feedline for ", big_station);
+
+        local platform = big_station.get_free_platform();
+
+        if (null == platform) return;
+
+        local tiles = platform.entrance_tiles;
+        local tile_index = tiles[0];
 	}
 }
 
