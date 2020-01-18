@@ -22,16 +22,17 @@ function Plan::find_stations ()
         if (is_big_station(station) && 
             !this.big_stations.HasItem(station))
         {
-            this.big_stations.AddItem(station, 0);
-            local tile_index = AIStation.GetLocation(station);
-            this.stations.push(Station(tile_index));
             Debug("found a big station");
+
+            this.big_stations.AddItem(station, 0);
+            this.stations.push(Station(station));
         }
 	}
 }
 
 function Plan::get_task ()
 {
+        return null;
     if (this.big_stations.Count() == 0)
     {
         return null;
