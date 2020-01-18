@@ -9,10 +9,15 @@ const MAX_DISTANCE = 100;
 const MAX_BUS_ROUTE_DISTANCE = 40;
 const INDEPENDENTLY_WEALTHY = 1000000;	// no longer need a loan
 
+// TODO make these configurable
+
+// anything <= this number will be considered a valid feeder platform
+// which the AI will transfer cargo into
+const FEEDER_PLATFORM_MAX_LENGTH = 6;
+
 class Feeder extends AIController
 {
     plan = null;
-
 
     function try_add_new_task (task)
     {
@@ -125,7 +130,7 @@ function Feeder::Start ()
 		if (tasks.len() == 0)
         {
             this.plan.find_stations();
-            this.try_add_new_task(this.plan.get_task());
+            this.try_add_new_task(this.plan.get_fresh_task());
 		}
 
         // didn't find anything to do
