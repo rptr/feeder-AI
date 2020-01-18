@@ -3,16 +3,18 @@ require("tiles.nut");
 
 class Platform extends WorldObject
 {
-    orientation = null;
-    tiles       = null;
+    orientation     = null;
+    tiles           = null;
+    entrance_tiles  = null;
 
     constructor (tile_index)
     {
         Debug("Platform::Platform(): new platform");
 
 		WorldObject.constructor(location);
-        orientation = AIRail.GetRailStationDirection(tile_index);
-        tiles = [tile_index];
+        orientation     = AIRail.GetRailStationDirection(tile_index);
+        tiles           = [tile_index];
+        entrance_tiles  = [];
     }
 }
 
@@ -24,7 +26,7 @@ function Platform::can_attach (tile_index)
     {
         local platform_dir = AIRail.GetRailStationDirection(tile);
 
-        if (rail_tiles_connectable(tile, tile_index, platform_dir) &&
+        if (railstation_tiles_connectable(tile, tile_index, platform_dir) &&
             platform_dir == dir)
         {
             return true;
@@ -41,6 +43,19 @@ function Platform::attach_tile (tile_index)
     this.tiles.push(tile_index);
 }
 
+function Platform::calculate_entrance_tiles ()
+{
+    Debug("Platform::calculate_entrance_tiles()");
+
+    foreach (i, tile in tiles)
+    {
+        local entrance = railstation_get_free_connectable_tiles(tile);
+        entrance_tiles.extend(entrance);
+    }
+
+    Debug("found", entrance_tiles.len(), "entrance tiles");
+}
+
 class Station extends WorldObject
 {
     station_id  = null;
@@ -48,13 +63,13 @@ class Station extends WorldObject
 
     constructor (id)
     {
+        Debug("new station at tile index", location);
+
         if (!AIStation.IsValidStation(id))
         {
             Debug("Station::Station(): not valid station id", id);
             return;
         }
-
-        Debug("new station at tile index", location);
 
         local location = AIStation.GetLocation(id);
 
@@ -101,6 +116,11 @@ function Station::find_platforms ()
         {
             existing.attach_tile(tile);
         }
+    }
+
+    foreach (i, platform in platforms)
+    {
+        platform.calculate_entrance_tiles();
     }
 
     Debug("found", this.platforms.len(), "platforms");
