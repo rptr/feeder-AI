@@ -64,6 +64,7 @@ class Station extends WorldObject
 {
     station_id  = null;
     platforms   = null;
+    cargo_types = null;
 
     constructor (id)
     {
@@ -146,6 +147,23 @@ function Station::find_platforms ()
     }
 
     Debug("found", this.platforms.len(), "platforms");
+}
+
+// TODO optimise
+function Station::find_cargo_types ()
+{
+    local all_types     = AICargoList();
+    local cargo_types   = [];
+
+    foreach (i, cargo in all_types)
+    {
+        if (AIStation.HasCargoRating(station_id, cargo))
+        {
+            cargo_types.push(cargo);
+        }
+    }
+
+    return cargo_types;
 }
 
 // re-runs all the platform detection stuff
