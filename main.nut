@@ -9,19 +9,6 @@ const MAX_DISTANCE = 100;
 const MAX_BUS_ROUTE_DISTANCE = 40;
 const INDEPENDENTLY_WEALTHY = 1000000;	// no longer need a loan
 
-enum Direction {
-	N, E, S, W, NE, NW, SE, SW
-}
-
-// counterclockwise
-enum Rotation {
-	ROT_0, ROT_90, ROT_180, ROT_270
-}
-
-enum SignalMode {
-	NONE, FORWARD, BACKWARD
-}
-
 class Feeder extends AIController
 {
     plan = null;
@@ -37,37 +24,6 @@ class Feeder extends AIController
         this.tasks.push(task);
         Debug("new task", task);
     }
-	
-	function WaitForMoney(amount) {
-		local reserve = GetMinimumSafeMoney();
-		local autorenew = GetAutoRenewMoney();
-		local total = amount + reserve + autorenew;
-		
-		Debug("Waiting until we have £" + total + " (£" + amount + " to spend plus £" + reserve + " in reserve and £" + autorenew + " for autorenew)");
-		MaxLoan();
-		while (GetBankBalance() < amount) {
-			local percentage = (100 * GetBankBalance()) / total;
-			local bar = "";
-			for (local i = 0; i < 100; i += 10) {
-				if (percentage > i) {
-					bar += "I";
-				} else {
-					bar += ".";
-				}
-			}
-			
-			// maximum sign length is 30 characters; pound sign seems to require two (bytes?)
-			local currency = total >= 100000 ? "" : "£";
-			SetSecondarySign("Money: need " + currency + total/1000 + "K [" + bar + "]");
-			
-			FullyMaxLoan();
-			HandleEvents();
-			Sleep(TICKS_PER_DAY);
-			MaxLoan();
-		}
-		
-		ClearSecondarySign();
-	}
 	
 	function HandleEvents ()
     {
