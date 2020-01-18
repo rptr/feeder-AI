@@ -23,6 +23,7 @@ class RelativeCoordinates
 		 -1, 0]
 	];
 	
+    // TileIndex
 	location = null;
 	rotation = null;	
 	

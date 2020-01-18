@@ -1,26 +1,30 @@
 class Plan
 {
     stations = null;
+    // this just keeps track of which we've already dealt with 
     big_stations = null;
 
     constructor ()
     {
+        this.stations = [];
         this.big_stations = AIList();
     }
 }
 
 function Plan::find_stations ()
 {
-	this.stations = AIStationList(AIStation.STATION_TRAIN);
+	local all_stations = AIStationList(AIStation.STATION_TRAIN);
 
-	for (local station = this.stations.Begin();
-         this.stations.HasNext(); 
-         station = this.stations.Next())
+	for (local station = all_stations.Begin();
+         all_stations.HasNext(); 
+         station = all_stations.Next())
     {
         if (is_big_station(station) && 
             !this.big_stations.HasItem(station))
         {
-            this.big_stations.AddItem(station, station);
+            this.big_stations.AddItem(station, 0);
+            local tile_index = AIStation.GetLocation(station);
+            this.stations.push(Station(tile_index));
             Debug("found a big station");
         }
 	}
