@@ -22,7 +22,7 @@ function Plan::find_stations ()
         if (is_big_station(station) && 
             !this.big_stations.HasItem(station))
         {
-            Debug("found a big station");
+            Debug("found a new station");
 
             this.big_stations.AddItem(station, 0);
             this.stations.push(Station(station));
@@ -30,18 +30,39 @@ function Plan::find_stations ()
 	}
 }
 
-function Plan::get_task ()
+function Plan::get_fresh_task ()
 {
-        return null;
     if (this.big_stations.Count() == 0)
     {
         return null;
     }
 
-    local big = this.big_stations.Begin();
-    local task = FeedLine(big);
+    local station = get_free_feeder_station();
+
+    if (null == station)
+    {
+        DEBUG("nowhere to feed into");
+        return null;
+    }
+
+    local task = FeedLine(station);
 
     return task;
+}
+
+function Plan::get_free_feeder_station ()
+{
+    foreach (i, station in stations)
+    {
+        local platform  = station.get_free_platform();
+
+        if (platform != null)
+        {
+            return station;
+        }
+    }
+
+    return null;
 }
 
 function is_big_station (station)

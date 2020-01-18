@@ -6,6 +6,7 @@ class Platform extends WorldObject
     orientation     = null;
     tiles           = null;
     entrance_tiles  = null;
+    length          = null;
 
     constructor (tile_index)
     {
@@ -15,6 +16,7 @@ class Platform extends WorldObject
         orientation     = AIRail.GetRailStationDirection(tile_index);
         tiles           = [tile_index];
         entrance_tiles  = [];
+        length          = 1;
     }
 }
 
@@ -39,6 +41,8 @@ function Platform::can_attach (tile_index)
 function Platform::attach_tile (tile_index)
 {
     Debug("Platform::attach_tile(): attach new tile");
+
+    length += 1;
 
     this.tiles.push(tile_index);
 }
@@ -75,12 +79,14 @@ class Station extends WorldObject
 
 		WorldObject.constructor(location);
         this.station_id = id;
-        this.platforms  = [];
-       
-        this.find_platforms(); 
+
+        recalculate(); 
     }
 }
 
+/*
+ * returns a platform that `tile_index` can attach to
+ */
 function Station::get_attachable_platform (tile_index)
 {
     foreach (i, platform in this.platforms)
@@ -92,6 +98,22 @@ function Station::get_attachable_platform (tile_index)
     }
 
     return null;
+}
+
+/* 
+ *returns a platform with free entrance tiles
+ */
+function Station::get_free_platform ()
+{
+    foreach (i, platform in platforms)
+    {
+        if (platform.entrance_tiles.len() > 0)
+        {
+            return platform;
+        }
+    }
+
+    return null
 }
 
 function Station::find_platforms ()
@@ -126,3 +148,9 @@ function Station::find_platforms ()
     Debug("found", this.platforms.len(), "platforms");
 }
 
+// re-runs all the platform detection stuff
+function Station::recalculate ()
+{
+    platforms  = [];
+    find_platforms(); 
+}
