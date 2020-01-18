@@ -26,7 +26,7 @@ class RelativeCoordinates
 	location = null;
 	rotation = null;	
 	
-	constructor(location, rotation = Rotation.ROT_0)
+	constructor (location, rotation = Rotation.ROT_0)
     {
 		this.location = location;
 		this.rotation = rotation;
@@ -35,8 +35,10 @@ class RelativeCoordinates
 	function GetTile (coordinates)
     {
 		local matrix = matrices[rotation];
-		local x = coordinates[0] * matrix[0] + coordinates[1] * matrix[1];
-		local y = coordinates[0] * matrix[2] + coordinates[1] * matrix[3];
+		local x = coordinates[0] * matrix[0] + 
+                  coordinates[1] * matrix[1];
+		local y = coordinates[0] * matrix[2] + 
+                  coordinates[1] * matrix[3];
 		//Debug(coordinates[0] + "," + coordinates[1] + " -> " + x + "," + y);
 		return location + AIMap.GetTileIndex(x, y);
 	}
@@ -48,33 +50,41 @@ class WorldObject
 	location = null;
 	rotation = null;
 	
-	constructor(location, rotation = Rotation.ROT_0)
+	constructor (location, rotation = Rotation.ROT_0)
     {
-		this.relativeCoordinates = RelativeCoordinates(location, rotation);
+		this.relativeCoordinates = 
+            RelativeCoordinates(location, rotation);
 		this.location = location;
 		this.rotation = rotation;
 	}
 	
-	function GetTile(coordinates)
+	function GetTile (coordinates)
     {
 		return relativeCoordinates.GetTile(coordinates);
 	}
 	
-	function TileStrip(start, end) {
+	function TileStrip (start, end)
+    {
 		local tiles = [];
-		
 		local count, xstep, ystep;
-		if (start[0] == end[0]) {
+
+		if (start[0] == end[0])
+        {
 			count = abs(end[1] - start[1]);
 			xstep = 0;
 			ystep = end[1] < start[1] ? -1 : 1;
-		} else {
+		}
+        else
+        {
 			count = abs(end[0] - start[0]);
 			xstep = end[0] < start[0] ? -1 : 1;
 			ystep = 0
 		}
 		
-		for (local i = 0, x  = start[0], y = start[1]; i <= count; i++, x += xstep, y += ystep) {
+		for (local i = 0, x  = start[0], y = start[1]; 
+             i <= count; 
+             i++, x += xstep, y += ystep)
+        {
 			tiles.append(GetTile([x, y]));
 		}
 				
