@@ -1,4 +1,5 @@
 require("world.nut");
+require("tiles.nut");
 
 class Platform extends WorldObject
 {

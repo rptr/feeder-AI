@@ -48,5 +48,6 @@ function is_big_station (station)
 {
     local name = AIStation.GetName(station);
 
-    return (name.find("BIG") != null);
+    return true;
+    /* return (name.find("BIG") != null); */
 }
