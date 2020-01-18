@@ -15,6 +15,13 @@ const INDEPENDENTLY_WEALTHY = 1000000;	// no longer need a loan
 // which the AI will transfer cargo into
 const FEEDER_PLATFORM_MAX_LENGTH = 6;
 
+enum TaskReturnState
+{
+    TASK_DONE,
+    TASK_UNFINISHED,
+    TASK_ERROR
+}
+
 class Feeder extends AIController
 {
     plan = null;
@@ -118,64 +125,75 @@ function Feeder::Start ()
 
 	while (true)
     {
-		HandleEvents();
-		
-		if (year != AIDate.GetYear(AIDate.GetCurrentDate()))
-        {
-			/* CullTrains(); */
-			year = AIDate.GetYear(AIDate.GetCurrentDate());
-		}
-
-        // nothing to do	
-		if (tasks.len() == 0)
-        {
-            this.plan.find_stations();
-            this.try_add_new_task(this.plan.get_fresh_task());
-		}
-
-        // didn't find anything to do
-        if (tasks.len() == 0)
-        {
-            Sleep(SLEEP_TICKS);
-            continue;
-        }
-		
-		Debug("Tasks: " + ArrayToString(tasks));
-
-		try
-        {
-			local task = tasks[0];
-			Debug("Running: " + task);
-			task.run();
-			tasks.remove(0);
-		}
-        catch (e)
-        {
-			if (typeof(e) == "instance")
-            {
-				/* if (e instanceof TaskRetryException) */
-                /* { */
-				/* 	Sleep(e.sleep); */
-				/* 	Debug("Retrying..."); */
-				/* } */
-                /* else if (e instanceof TaskFailedException) */
-                /* { */
-				/* 	Warning(task + " failed: " + e); */
-				/* 	tasks.remove(0); */
-				/* 	task.Failed(); */
-				/* } */
-                /* else if (e instanceof NeedMoneyException) */
-                /* { */
-				/* 	Debug(task + " needs £" + e.amount); */
-				/* 	minMoney = e.amount; */
-				/* } */
-			}
-            else
-            {
-				Error("Unexpected error");
-				return;
-			}
-		}
+        MainLoop();
 	}
+}
+
+function Feeder::MainLoop ()
+{
+    HandleEvents();
+    
+    if (year != AIDate.GetYear(AIDate.GetCurrentDate()))
+    {
+        /* CullTrains(); */
+        year = AIDate.GetYear(AIDate.GetCurrentDate());
+    }
+
+    // nothing to do	
+    if (tasks.len() == 0)
+    {
+        this.plan.find_stations();
+        this.try_add_new_task(this.plan.get_fresh_task());
+    }
+
+    // didn't find anything to do
+    if (tasks.len() == 0)
+    {
+        Sleep(SLEEP_TICKS);
+        continue;
+    }
+    
+    Debug("Tasks: " + ArrayToString(tasks));
+
+    try
+    {
+        local task = tasks[0];
+        Debug("Running: " + task);
+        local res = task.run();
+
+        if (res == TASK_UNFINISHED)
+        {
+        else
+        {
+            tasks.remove(0);
+        }
+    }
+    catch (e)
+    {
+        if (typeof(e) == "instance")
+        {
+            /* if (e instanceof TaskRetryException) */
+            /* { */
+            /* 	Sleep(e.sleep); */
+            /* 	Debug("Retrying..."); */
+            /* } */
+            /* else if (e instanceof TaskFailedException) */
+            /* { */
+            /* 	Warning(task + " failed: " + e); */
+            /* 	tasks.remove(0); */
+            /* 	task.Failed(); */
+            /* } */
+            /* else if (e instanceof NeedMoneyException) */
+            /* { */
+            /* 	Debug(task + " needs £" + e.amount); */
+            /* 	minMoney = e.amount; */
+            /* } */
+        }
+        else
+        {
+            Error("Unexpected error");
+            return;
+        }
+    }
 }
 

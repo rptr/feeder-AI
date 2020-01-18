@@ -48,8 +48,12 @@ class FeedLine extends Task
 
         if (null == platform) return;
 
+        local station_id = big_station.station_id;
         local tiles = platform.entrance_tiles;
         local tile_index = tiles[0];
+
+        local cargoes = big_station.get_cargo_types();
+
 	}
 }
 
