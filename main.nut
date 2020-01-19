@@ -25,6 +25,8 @@ enum TaskReturnState
 class Feeder extends AIController
 {
     plan = null;
+    minMoney = null;
+    year = null;
 
     function try_add_new_task (task)
     {
@@ -120,8 +122,8 @@ function Feeder::Start ()
 		tasks.push(LongLine());
 	}
 
-	local minMoney = 0;
-	local year = 0;
+	minMoney = 0;
+	year = 0;
 
 	while (true)
     {
@@ -150,7 +152,7 @@ function Feeder::MainLoop ()
     if (tasks.len() == 0)
     {
         Sleep(SLEEP_TICKS);
-        continue;
+        return;
     }
     
     Debug("Tasks: " + ArrayToString(tasks));
@@ -161,8 +163,11 @@ function Feeder::MainLoop ()
         Debug("Running: " + task);
         local res = task.run();
 
-        if (res == TASK_UNFINISHED)
+        if (res == TaskReturnState.TASK_UNFINISHED)
         {
+            // temp
+            tasks.remove(0);
+        }
         else
         {
             tasks.remove(0);

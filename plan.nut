@@ -72,3 +72,8 @@ function is_big_station (station)
     return true;
     /* return (name.find("BIG") != null); */
 }
+
+function Plan::find_industries ()
+{
+    return [];
+}
