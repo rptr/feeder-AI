@@ -173,6 +173,37 @@ function Station::get_cargo_types ()
     return cargo_types;
 }
 
+/*
+ * look for relevant industries close to station - for feeding
+ */
+function Station::find_industries (cargo_types)
+{
+    Debug("Station::find_industries()");
+
+    local cargo_types   = SL.Helper.GetRawCargo();
+    local industries    = AIList();
+    local station_tile  = AIStation.GetLocation(station_id);
+    local max_dist      = 200;
+
+    foreach (i, cargo in cargo_types)
+    {
+        local all = AIIndustryList_CargoProducing(cargo);
+
+        foreach (industry, v in all)
+        {
+            local tile_index = AIIndustry.GetLocation(industry);
+            local dist = AIMap.ManhattanDistance(station_tile, tile_index);
+
+            if (dist < max_dist)
+            {
+                industries.AddList();
+            }
+        }
+    }
+
+    return industries;
+}
+
 function Station::recalculate ()
 {
 }

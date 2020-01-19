@@ -72,15 +72,8 @@ function TaskFeedLine::run ()
 
     local cargoes = big_station.get_cargo_types();
 
-    // TEMP
-    local all_cargo = AICargoList();
-
-    foreach (cc in [AICargo.CC_PASSENGERS, AICargo.CC_MAIL, AICargo.CC_EXPRESS])
-    {
-        all_cargo.Valuate(AICargo.HasCargoClass, cc);
-        all_cargo.KeepValue(0);
-    }
-
+    // TEMP -- get this info from the station instead
+    local all_cargo = SL.Helper.GetRawCargo();
     all_cargo.Begin();
     while (all_cargo.HasNext())
         cargoes.push(all_cargo.Next());
@@ -91,29 +84,19 @@ function TaskFeedLine::run ()
         return TaskReturnState.ERROR;
     }
 
-    local industries = AIList();
+    local industry_id = big_station.get_industry();
 
-    foreach (i, cargo in cargoes)
-    {
-        industries.AddList(AIIndustryList_CargoProducing(cargo));
-    }
-
-    Debug("found", industries.Count(), "industries");
-
-    if (industries.Count() == 0)
+    if (null == industry)
     {
         Warning("no available industries");
         return TaskReturnState.ERROR;
     }
 
-    // TODO pick the best one
-    local industry_id = industries.Begin();
-
     local source_tile_index = find_industry_station_site(industry_id);
 
     if (source_tile_index == null)
     {
-        Warning("no available industries");
+        Warning("industry not reachable");
         return TaskReturnState.ERROR;
     }
 
