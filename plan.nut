@@ -51,7 +51,7 @@ function Plan::get_fresh_task ()
 
     if (null == station)
     {
-        Debug("nowhere to feed into");
+        /* Debug("nowhere to feed into"); */
         return null;
     }
 

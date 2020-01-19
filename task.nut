@@ -56,13 +56,13 @@ class TaskFeedLine extends Task
 
 function TaskFeedLine::run ()
 {
-    Debug("building feedline for ", big_station);
+    Info("TaskFeedLine::run()", big_station);
 
     local platform = big_station.get_free_platform();
 
     if (null == platform)
     {
-        Debug("station has no free platform after all");
+        Warning("station has no free platform after all");
         return TaskReturnState.ERROR;
     }
 
@@ -87,7 +87,7 @@ function TaskFeedLine::run ()
 
     if (cargoes.len() == 0)
     {
-        Debug("station has no cargo rating");
+        Warning("station has no cargo rating");
         return TaskReturnState.ERROR;
     }
 
@@ -96,14 +96,13 @@ function TaskFeedLine::run ()
     foreach (i, cargo in cargoes)
     {
         industries.AddList(AIIndustryList_CargoProducing(cargo));
-        Debug("found", industries.Count(), "industries");
     }
 
     Debug("found", industries.Count(), "industries");
 
     if (industries.Count() == 0)
     {
-        Debug("no available industries");
+        Warning("no available industries");
         return TaskReturnState.ERROR;
     }
 
@@ -114,7 +113,7 @@ function TaskFeedLine::run ()
 
     if (source_tile_index == null)
     {
-        Debug("no available industries");
+        Warning("no available industries");
         return TaskReturnState.ERROR;
     }
 
@@ -128,10 +127,18 @@ function TaskFeedLine::run ()
                        target_tile_index, dir2)
         ];
 
-    // make it so it doesn't have free tiles anymore
-    big_station.connect(target_tile_index);
+    Debug("run subtasks");
 
-    return TaskReturnState.HAVE_SUBTASKS;
+    foreach (i, subtask in subtasks)
+    {
+        subtask.run();
+    }
+
+    // make it so it doesn't have free tiles anymore
+    platform.reserve();
+    big_station.recalculate();
+
+    return TaskReturnState.DONE;
 }
 
 /*
@@ -157,6 +164,8 @@ class TaskBuildFeedStation extends Task
 
 function TaskBuildFeedStation::run ()
 {
+    Info("TaskBuildFeedStation::run()");
+
     local new_id;
     local platlen   = FEEDER_PLATFORM_MAX_LENGTH;
     local direction = AIRail.RAILTRACK_NE_SW;
@@ -207,7 +216,7 @@ class TaskBuildTrack extends Task
 
 function TaskBuildTrack::run ()
 {
-    Debug("TaskBuildTrack::run()");
+    Info("TaskBuildTrack::run()");
 
     local path;
     local dir1 = SL.Direction.OppositeDir(source_direction);

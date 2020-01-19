@@ -24,9 +24,6 @@ class Platform extends WorldObject
 
 function Platform::can_attach (tile_index)
 {
-    if (attached)
-        return false;
-
     local dir = AIRail.GetRailStationDirection(tile_index);
 
     foreach (i, tile in this.tiles)
@@ -63,6 +60,11 @@ function Platform::calculate_entrance_tiles ()
     }
 
     Debug("found", entrance_tiles.len(), "entrance tiles");
+}
+
+function Platform::reserve ()
+{
+    attached += 1;
 }
 
 class Station extends WorldObject
@@ -113,7 +115,7 @@ function Station::get_free_platform ()
 {
     foreach (i, platform in platforms)
     {
-        if (platform.entrance_tiles.len() > 0)
+        if (platform.attached == 0 && platform.entrance_tiles.len() > 0)
         {
             return platform;
         }
@@ -176,20 +178,5 @@ function Station::recalculate ()
 {
     platforms  = [];
     find_platforms(); 
-}
-
-/*
- * another station has connected to us
- */
-function Station::connect (tile_index)
-{
-    local platform = get_attachable_platform(tile_index);
-
-    if (platform)
-    {
-        platform.attached += 1;
-    }
-
-    recalculate();
 }
 
