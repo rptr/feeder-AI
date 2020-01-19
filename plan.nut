@@ -3,12 +3,22 @@ class Plan
     stations = null;
     // this just keeps track of which we've already dealt with 
     big_stations = null;
+    ai_stations = null;
 
     constructor ()
     {
-        this.stations = [];
-        this.big_stations = AIList();
+        stations        = [];
+        big_stations    = AIList();
+        ai_stations     = AIList();
     }
+}
+
+/*
+ * AI-built station
+ */
+function Plan::register_station (station_id)
+{
+    ai_stations.AddItem(station_id, 1);
 }
 
 function Plan::find_stations ()
@@ -41,11 +51,11 @@ function Plan::get_fresh_task ()
 
     if (null == station)
     {
-        DEBUG("nowhere to feed into");
+        Debug("nowhere to feed into");
         return null;
     }
 
-    local task = FeedLine(station);
+    local task = TaskFeedLine(station);
 
     return task;
 }
@@ -69,7 +79,8 @@ function is_big_station (station)
 {
     local name = AIStation.GetName(station);
 
-    return true;
+    // it's not one AI created
+    return !ai_stations.HasItem(station);
     /* return (name.find("BIG") != null); */
 }
 
