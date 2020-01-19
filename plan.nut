@@ -3,13 +3,17 @@ class Plan
     stations = null;
     // this just keeps track of which we've already dealt with 
     big_stations = null;
+    // stations the AI built
     ai_stations = null;
+    // industries the AI claimed
+    ai_industries = null;
 
     constructor ()
     {
         stations        = [];
         big_stations    = AIList();
         ai_stations     = AIList();
+        ai_industries   = AIList();
     }
 }
 
@@ -19,6 +23,14 @@ class Plan
 function Plan::register_station (station_id)
 {
     ai_stations.AddItem(station_id, 1);
+}
+
+/*
+ * AI claimed this industry
+ */
+function Plan::register_industry (industry_id)
+{
+    ai_industries.AddItem(industry_id, 1);
 }
 
 function Plan::find_stations ()
@@ -90,3 +102,5 @@ function Plan::find_industries ()
 {
     return [];
 }
+
+
