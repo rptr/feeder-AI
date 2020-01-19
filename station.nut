@@ -88,7 +88,7 @@ class Station extends WorldObject
 		WorldObject.constructor(location);
         this.station_id = id;
 
-        recalculate(); 
+        find_platforms();
     }
 }
 
@@ -117,7 +117,7 @@ function Station::get_free_platform ()
     {
         if (platform.attached == 0 && platform.entrance_tiles.len() > 0)
         {
-            return platform;
+            return platforms[i];
         }
     }
 
@@ -150,10 +150,10 @@ function Station::find_platforms ()
 
     foreach (i, platform in platforms)
     {
-        platform.calculate_entrance_tiles();
+        platforms[i].calculate_entrance_tiles();
     }
 
-    Debug("found", this.platforms.len(), "platforms");
+    Info("found", this.platforms.len(), "platforms");
 }
 
 // TODO optimise
@@ -173,10 +173,7 @@ function Station::get_cargo_types ()
     return cargo_types;
 }
 
-// re-runs all the platform detection stuff
 function Station::recalculate ()
 {
-    platforms  = [];
-    find_platforms(); 
 }
 
