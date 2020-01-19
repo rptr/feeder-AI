@@ -7,6 +7,7 @@ class Platform extends WorldObject
     tiles           = null;
     entrance_tiles  = null;
     length          = null;
+    attached        = null;
 
     constructor (tile_index)
     {
@@ -17,11 +18,15 @@ class Platform extends WorldObject
         tiles           = [tile_index];
         entrance_tiles  = [];
         length          = 1;
+        attached        = 0;
     }
 }
 
 function Platform::can_attach (tile_index)
 {
+    if (attached)
+        return false;
+
     local dir = AIRail.GetRailStationDirection(tile_index);
 
     foreach (i, tile in this.tiles)
@@ -172,3 +177,19 @@ function Station::recalculate ()
     platforms  = [];
     find_platforms(); 
 }
+
+/*
+ * another station has connected to us
+ */
+function Station::connect (tile_index)
+{
+    local platform = get_attachable_platform(tile_index);
+
+    if (platform)
+    {
+        platform.attached += 1;
+    }
+
+    recalculate();
+}
+

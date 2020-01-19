@@ -129,7 +129,7 @@ function TaskFeedLine::run ()
         ];
 
     // make it so it doesn't have free tiles anymore
-    big_station.recalculate();
+    big_station.connect(target_tile_index);
 
     return TaskReturnState.HAVE_SUBTASKS;
 }
