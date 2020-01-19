@@ -1,3 +1,7 @@
+import("util.superlib", "SuperLib", 40);
+
+SL <- SuperLib;
+
 require("util.nut");
 require("task.nut");
 require("finance.nut");
@@ -17,16 +21,18 @@ const FEEDER_PLATFORM_MAX_LENGTH = 6;
 
 enum TaskReturnState
 {
-    TASK_DONE,
-    TASK_UNFINISHED,
-    TASK_ERROR
+    DONE,
+    UNFINISHED,
+    ERROR,
+    HAVE_SUBTASKS
 }
 
 class Feeder extends AIController
 {
-    plan = null;
+    static plan = Plan();
     minMoney = null;
     year = null;
+    static pathfinder = RailPathFinder();
 
     function try_add_new_task (task)
     {
@@ -99,7 +105,8 @@ class Feeder extends AIController
 
 function Feeder::Start ()
 {
-    this.plan = Plan();
+    local types = AIRailTypeList();
+    AIRail.SetCurrentRailType(types.Begin());
 
 	AICompany.SetAutoRenewStatus(true);
 	AICompany.SetAutoRenewMonths(0);
@@ -110,7 +117,7 @@ function Feeder::Start ()
 	::COMPANY <- AICompany.ResolveCompanyID(
                     AICompany.COMPANY_SELF);
 	::TICKS_PER_DAY <- 37;
-    ::SLEEP_TICKS <- 5;
+    ::SLEEP_TICKS <- 10;
 	::SIGN1 <- -1;
 	::SIGN2 <- -1;
 	::tasks <- [];
@@ -144,8 +151,8 @@ function Feeder::MainLoop ()
     // nothing to do	
     if (tasks.len() == 0)
     {
-        this.plan.find_stations();
-        this.try_add_new_task(this.plan.get_fresh_task());
+        Feeder.plan.find_stations();
+        this.try_add_new_task(Feeder.plan.get_fresh_task());
     }
 
     // didn't find anything to do
@@ -163,15 +170,26 @@ function Feeder::MainLoop ()
         Debug("Running: " + task);
         local res = task.run();
 
-        if (res == TaskReturnState.TASK_UNFINISHED)
+        if (res == TaskReturnState.UNFINISHED)
         {
             // temp
+            tasks.remove(0);
+        }
+        else if (res == TaskReturnState.HAVE_SUBTASKS)
+        {
+            foreach (i, subtask in task.subtasks)
+            {
+                subtask.run();
+            }
+
             tasks.remove(0);
         }
         else
         {
             tasks.remove(0);
         }
+
+        Sleep(10);
     }
     catch (e)
     {
