@@ -196,7 +196,7 @@ function Station::find_industries (cargo_types)
 
             if (dist < max_dist)
             {
-                industries.AddList();
+                industries.AddItem(industry, 0);
             }
         }
     }
