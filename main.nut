@@ -1,6 +1,7 @@
 import("util.superlib", "SuperLib", 40);
 
 SL <- SuperLib;
+Log <- SL.Log;
 
 require("util.nut");
 require("task.nut");
@@ -162,7 +163,8 @@ function Feeder::MainLoop ()
         return;
     }
     
-    Debug("Tasks: " + ArrayToString(tasks));
+    Info("");
+    Info("tasks: " + ArrayToString(tasks));
 
     try
     {
@@ -172,22 +174,18 @@ function Feeder::MainLoop ()
 
         if (res == TaskReturnState.UNFINISHED)
         {
-            // temp
-            tasks.remove(0);
+            Info("task unfinished");
         }
-        else if (res == TaskReturnState.HAVE_SUBTASKS)
+        else if (res == TaskReturnState.ERROR)
         {
-            foreach (i, subtask in task.subtasks)
-            {
-                subtask.run();
-            }
-
-            tasks.remove(0);
+            Warning("task error");
         }
         else
         {
-            tasks.remove(0);
+            Info("task done");
         }
+
+        tasks.remove(0);
 
         Sleep(10);
     }

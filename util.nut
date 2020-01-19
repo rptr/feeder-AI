@@ -2,7 +2,13 @@
  * "borrowed" from ChooChoo
  */
 
-function Debug(...) {
+// 3: debug, 2: warning, 1: error
+const log_level = 3;
+
+function Debug(...)
+{
+    if (log_level < 4) return;
+
 	local s = "";
 	for(local i = 0; i< vargc; i++) {
 		s = s + " " + vargv[i];
@@ -11,7 +17,22 @@ function Debug(...) {
 	AILog.Info(GetDate() + ":" + s);
 }
 
-function Warning(...) {
+function Info(...)
+{
+    if (log_level < 3) return;
+
+	local s = "";
+	for(local i = 0; i< vargc; i++) {
+		s = s + " " + vargv[i];
+	}
+	
+	AILog.Info(GetDate() + ":" + s);
+}
+
+function Warning(...)
+{
+    if (log_level < 2) return;
+
 	local s = "";
 	for(local i = 0; i< vargc; i++) {
 		s = s + " " + vargv[i];
@@ -20,7 +41,8 @@ function Warning(...) {
 	AILog.Warning(GetDate() + ":" + s);
 }
 
-function Error(...) {
+function Error(...)
+{
 	local s = "";
 	for(local i = 0; i< vargc; i++) {
 		s = s + " " + vargv[i];
