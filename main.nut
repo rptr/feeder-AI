@@ -186,6 +186,7 @@ function Feeder::MainLoop ()
         }
 
         tasks.remove(0);
+        Info("");
 
         Sleep(10);
     }

@@ -131,12 +131,16 @@ function TaskFeedLine::run ()
 
     foreach (i, subtask in subtasks)
     {
-        subtask.run();
+        if (subtask.run() != TaskReturnState.DONE)
+        {
+            // TODO undo everything
+            return TaskReturnState.ERROR;
+        }
     }
 
     // make it so it doesn't have free tiles anymore
     platform.reserve();
-    big_station.recalculate();
+    /* big_station.recalculate(); */
 
     return TaskReturnState.DONE;
 }
@@ -243,7 +247,7 @@ function TaskBuildTrack::run ()
 
     if (path == null)
     {
-        Debug("can't find path");
+        Warning("can't find path");
         return TaskReturnState.ERROR;
     }
 

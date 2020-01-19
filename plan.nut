@@ -32,7 +32,7 @@ function Plan::find_stations ()
         if (is_big_station(station) && 
             !this.big_stations.HasItem(station))
         {
-            Debug("found a new station");
+            Info("found a new station");
 
             this.big_stations.AddItem(station, 0);
             this.stations.push(Station(station));
@@ -62,6 +62,8 @@ function Plan::get_fresh_task ()
 
 function Plan::get_free_feeder_station ()
 {
+    Info("looking for work @", stations.len(), "stations");
+
     foreach (i, station in stations)
     {
         local platform  = station.get_free_platform();
