@@ -144,17 +144,17 @@ function TaskBuildFeedStation::run ()
 {
     Info("TaskBuildFeedStation::run()");
 
-    local new_id;
     local platlen   = FEEDER_PLATFORM_MAX_LENGTH;
-    local direction = AIRail.RAILTRACK_NE_SW;
+    local direction = SL.Direction.DIR_NE;
+    local opposite = SL.Direction.Opposite(direction);
     local offset    = SL.Direction.GetAdjacentTileInDirection(
-        entrance_tile_index,
-        SL.Direction.DIR_SW);
+                        entrance_tile_index,
+                        direction);
 
     /* todo : handle any possible station orientation */
 
 	local success = AIRail.BuildRailStation(offset, 
-                            direction, 
+                            SL.Direction.ToRailTrackDirection(direction), 
                             1, 
                             platlen, 
                             AIStation.STATION_NEW);
@@ -199,7 +199,20 @@ function TaskBuildFeedStation::run ()
         return TaskReturnState.ERROR;
     }
 
-    new_id = AIStation.GetStationID(offset);
+    build_rail([], entrance_tile_index, []);
+
+    local depot_tile    = SL.Direction.GetAdjacentTileInDirection(
+                            entrance_tile_index,
+                            SL.Direction.TurnClockwise90Deg(direction, 1));
+    // make depot from side, facing the entrance tile, a bit shit but ok
+    local success       = rail_build_depot(depot_tile, entrance_tile_index);
+
+    if (!success)
+    {
+        return TaskReturnState.ERROR;
+    }
+
+    local new_id = AIStation.GetStationID(offset);
     Feeder.plan.register_station(new_id);
 
     return TaskReturnState.DONE;
@@ -246,7 +259,7 @@ function TaskBuildTrack::run ()
     SL.Helper.SetSign(target_tile_id, "to  here");
 
     local path;
-    local dir1 = SL.Direction.OppositeDir(source_direction);
+    local dir1 = SL.Direction.Opposite(source_direction);
     local prev1 = SL.Direction.GetAdjacentTileInDirection(
         source_tile_id, dir1);
     local source = 
@@ -254,7 +267,7 @@ function TaskBuildTrack::run ()
         source_tile_id,
         prev1
     ];
-    local dir2 = SL.Direction.OppositeDir(target_direction);
+    local dir2 = SL.Direction.Opposite(target_direction);
     local prev2 = SL.Direction.GetAdjacentTileInDirection(
         target_tile_id, dir2);
     local target =
@@ -353,15 +366,28 @@ function TaskBuildTrain::run ()
         return TaskReturnState.ERROR;
     }
 
-    local rail_type     = AIRaiLTypeList().Begin();
-    local engine_type   = SL.Vehicle.GetRailEngine();
-
+    local rail_type     = AIRailTypeList().Begin();
+    local engine_type   = SL.Engine.GetRailEngine(cargo, rail_type);
     local new_id = AIVehicle.BuildVehicle(depot_tile, engine_type);
 
     if (!AIVeicle.IsValidVehicle(result))
     {
         Warning("can't build vehicle");
         return TaskReturnState.ERROR;
+    }
+
+    local plat_len      = FEEDER_PLATFORM_MAX_LENGTH;
+    local wagon_type    = SL.Engine.GetRailWagon(cargo, rail_type);
+
+    while (SL.Vehicle.TrainLength(new_id) < plat_len)
+    {
+        local wagon = AIVehicle.BuildVehicle(depot_tile, wagon_type);
+        CheckError();
+
+		AIVehicle.RefitVehicle(wagon, cargo);
+        CheckError();
+		
+        AIVehicle.MoveWagon(wagon, 0, train, 0);
     }
 
     return TaskReturnState.DONE;
