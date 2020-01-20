@@ -14,6 +14,15 @@ const MAX_DISTANCE = 100;
 const MAX_BUS_ROUTE_DISTANCE = 40;
 const INDEPENDENTLY_WEALTHY = 1000000;	// no longer need a loan
 
+// counterclockwise
+enum Rotation {
+	ROT_0, ROT_90, ROT_180, ROT_270
+}
+
+enum Direction {
+	N, E, S, W, NE, NW, SE, SW
+}
+
 // TODO make these configurable
 
 // anything <= this number will be considered a valid feeder platform

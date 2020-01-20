@@ -50,6 +50,16 @@ function Plan::find_stations ()
             this.stations.push(Station(station));
         }
 	}
+
+    // detect deletions
+    foreach (station, _ in big_stations)
+    {
+        if (!all_stations.HasItem(station))
+        {
+            Warning("station was deleted");
+            big_stations.RemoveItem(station);
+        }
+    }
 }
 
 function Plan::get_fresh_task ()
