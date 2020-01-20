@@ -18,7 +18,8 @@ const INDEPENDENTLY_WEALTHY = 1000000;	// no longer need a loan
 
 // anything <= this number will be considered a valid feeder platform
 // which the AI will transfer cargo into
-const FEEDER_PLATFORM_MAX_LENGTH = 6;
+const FEEDER_PLATFORM_MAX_LENGTH    = 6;
+const FEEDER_MAX_DISTANCE           = 50;
 
 enum TaskReturnState
 {

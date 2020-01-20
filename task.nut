@@ -84,9 +84,9 @@ function TaskFeedLine::run ()
         return TaskReturnState.ERROR;
     }
 
-    local industry_id = big_station.get_industry();
+    local industry_id = big_station.get_free_industry();
 
-    if (null == industry)
+    if (null == industry_id)
     {
         Warning("no available industries");
         return TaskReturnState.ERROR;
