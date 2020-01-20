@@ -33,7 +33,6 @@ function tile_index_add_coords (tile_index, coords)
 
 /*
  * direction: AIRail::RailTrack
- * only NE_SW or NW_SE (TODO)
  * returns bool
  */
 function railstation_tiles_connectable (tile_index_1, tile_index_2, direction)
