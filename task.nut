@@ -1,6 +1,7 @@
 import("pathfinder.rail", "RailPathFinder", 1);
 
 require("util.nut");
+require("world.nut");
 require("build.nut");
 
 class Task

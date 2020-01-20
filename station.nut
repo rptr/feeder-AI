@@ -144,9 +144,12 @@ function Station::get_attachable_platform (tile_index)
  */
 function Station::get_free_platform ()
 {
+    local max_len = FEEDER_PLATFORM_MAX_LENGTH;
+
     foreach (i, platform in platforms)
     {
-        if (platform.attached == 0 && platform.entrance_tiles.len() > 0)
+        if (platform.attached == 0 && platform.entrance_tiles.len() > 0 &&
+            platform.length <= max_len)
         {
             return platforms[i];
         }

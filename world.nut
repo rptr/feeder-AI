@@ -2,15 +2,6 @@
  * stolen from ChooChoo
  */
 
-// counterclockwise
-enum Rotation {
-	ROT_0, ROT_90, ROT_180, ROT_270
-}
-
-enum Direction {
-	N, E, S, W, NE, NW, SE, SW
-}
-
 class RelativeCoordinates
 {
 	static matrices =
