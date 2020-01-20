@@ -160,8 +160,13 @@ function TaskBuildFeedStation::run ()
     local new_id;
     local platlen   = FEEDER_PLATFORM_MAX_LENGTH;
     local direction = AIRail.RAILTRACK_NE_SW;
+    local offset    = SL.Direction.GetAdjacentTileInDirection(
+        entrance_tile_index,
+        SL.Direction.DIR_SW);
 
-	local success = AIRail.BuildRailStation(entrance_tile_index, 
+    /* todo : handle any possible station orientation */
+
+	local success = AIRail.BuildRailStation(offset, 
                             direction, 
                             1, 
                             platlen, 
@@ -207,7 +212,7 @@ function TaskBuildFeedStation::run ()
         return TaskReturnState.ERROR;
     }
 
-    new_id = AIStation.GetStationID(entrance_tile_index);
+    new_id = AIStation.GetStationID(offset);
     Feeder.plan.register_station(new_id);
 
     return TaskReturnState.DONE;
@@ -276,7 +281,7 @@ function TaskBuildTrack::run ()
     Feeder.pathfinder.InitializePath([source], [target]);
     path = Feeder.pathfinder.FindPath(2000);
 
-    if (path == null || path == false)
+    if (path == null)
     {
         Warning("can't find path");
         return TaskReturnState.ERROR;
