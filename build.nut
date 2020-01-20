@@ -87,3 +87,23 @@ function IsBuildableRectangle(location, rotation, from, to, mustBeFlat)
 	
 	return true;
 }
+
+function rail_build_depot (tile, front)
+{
+    // trying to build a depot where one already exists results in AREA_NOT_CLEAR, not ALREADY_BUILT
+    tile = GetTile(tile);
+    front = GetTile(front);
+
+    if (AIRail.IsRailDepotTile(tile) && 
+        AIRail.GetRailDepotFrontTile(tile) == front) 
+    {
+        return;
+    }
+
+    AIRail.BuildRailDepot(tile, front);
+    CheckError();
+}
+
+function CheckError ()
+{
+}
