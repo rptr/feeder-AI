@@ -25,6 +25,11 @@ function Plan::register_station (station_id)
     ai_stations.AddItem(station_id, 1);
 }
 
+function Plan::get_last_ai_station ()
+{
+    return ai_stations.Begin();
+}
+
 /*
  * AI claimed this industry
  */
@@ -84,7 +89,7 @@ function Plan::get_fresh_task ()
 
 function Plan::get_free_feeder_station ()
 {
-    Info("looking for work @", stations.len(), "stations");
+    Debug("looking for work @", stations.len(), "stations");
 
     foreach (i, station in stations)
     {

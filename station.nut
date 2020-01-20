@@ -124,6 +124,12 @@ function Industry::reserve ()
     taken = true;
 }
 
+function Industry::get_cargo_types ()
+{
+    local type = AIIndustry.GetIndustryType(industry_id);
+    return AIIndustryType.GetProducedCargo(type);
+}
+
 class Station extends WorldObject
 {
     station_id      = null;

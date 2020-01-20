@@ -71,20 +71,6 @@ function TaskFeedLine::run ()
     local entrance          = platform.get_entrance();
     local target_tile_index = entrance.tile_index;
     local target_direction  = entrance.direction;
-    local cargoes           = big_station.get_cargo_types();
-
-    // TEMP -- get this info from the station instead
-    local all_cargo = SL.Helper.GetRawCargo();
-    all_cargo.Begin();
-    while (all_cargo.HasNext())
-        cargoes.push(all_cargo.Next());
-
-    if (cargoes.len() == 0)
-    {
-        Warning("station has no cargo rating");
-        return TaskReturnState.ERROR;
-    }
-
     local industry = big_station.get_free_industry();
 
     if (null == industry)
@@ -103,12 +89,14 @@ function TaskFeedLine::run ()
     }
 
     local dir = SL.Direction.DIR_NE;
+    local cargo = industry.get_cargo_types().Begin();
 
     subtasks = 
         [
         TaskBuildFeedStation(source_tile_index),
-        TaskBuildTrack(source_tile_index, dir,
-                       target_tile_index, target_direction)
+        /* TaskBuildTrack(source_tile_index, dir, */
+        /*                target_tile_index, target_direction) */
+        TaskBuildTrain(station_id, cargo)
         ];
 
     Debug("run subtasks");
@@ -322,6 +310,58 @@ function TaskBuildTrack::run ()
             prev = path.GetTile();
             path = path.GetParent();
         }
+    }
+
+    return TaskReturnState.DONE;
+}
+
+class TaskBuildTrain extends Task
+{
+    source_station  = null;
+    target_station  = null;
+    cargo           = null;
+
+    constructor (target, cargo)
+    {
+        Task.constructor();
+        target_station  = target;
+        this.cargo      = cargo;
+
+        Info("build train between stations [",
+              source_station,
+              "] and [",
+              target_station,
+              "]");
+    }
+
+	function _tostring()
+    {
+		return "buildtrain";
+	}
+}
+
+function TaskBuildTrain::run ()
+{
+    Info("TaskBuildTrain::run()");
+
+    source_station      = Feeder.plan.get_last_ai_station();
+    local depot_tile    = SL.Vehicle.GetNearestDepot(source_station);
+
+    if (null == depot_tile)
+    {
+        Warning("no nearby depot");
+        return TaskReturnState.ERROR;
+    }
+
+    local rail_type     = AIRaiLTypeList().Begin();
+    local engine_type   = SL.Vehicle.GetRailEngine();
+
+    local new_id = AIVehicle.BuildVehicle(depot_tile, engine_type);
+
+    if (!AIVeicle.IsValidVehicle(result))
+    {
+        Warning("can't build vehicle");
+        return TaskReturnState.ERROR;
     }
 
     return TaskReturnState.DONE;
