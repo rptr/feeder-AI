@@ -42,7 +42,7 @@ function Plan::find_stations ()
          station = all_stations.Next())
     {
         if (is_big_station(station) && 
-            !this.big_stations.HasItem(station))
+            !big_stations.HasItem(station))
         {
             Info("found a new station");
 
@@ -88,6 +88,8 @@ function Plan::get_free_feeder_station ()
 
     foreach (i, station in stations)
     {
+        if (station.get_free_industry() == null) continue;
+
         local platform  = station.get_free_platform();
 
         if (platform != null)
