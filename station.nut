@@ -67,28 +67,54 @@ function Platform::reserve ()
     attached += 1;
 }
 
-class Station extends WorldObject
+class Industry extends WorldObject
 {
-    station_id  = null;
-    platforms   = null;
-    cargo_types = null;
+    industry_id     = null;
+    taken           = null;
 
     constructor (id)
     {
+        local location = AIStation.GetLocation(id);
+
+        Debug("new industry found at tile index", location);
+
+        if (!AIIndustry.IsValidIndustry(id))
+        {
+            Warning("Industry::Industry(): not valid industry id", id);
+            return;
+        }
+
+		WorldObject.constructor(location);
+        industry_id = id;
+        taken       = false;
+    }
+}
+
+class Station extends WorldObject
+{
+    station_id      = null;
+    platforms       = null;
+    cargo_types     = null;
+    industries      = null;
+
+    constructor (id)
+    {
+        local location = AIStation.GetLocation(id);
+
         Debug("new station at tile index", location);
 
         if (!AIStation.IsValidStation(id))
         {
-            Debug("Station::Station(): not valid station id", id);
+            Warning("Station::Station(): not valid station id", id);
             return;
         }
 
-        local location = AIStation.GetLocation(id);
-
 		WorldObject.constructor(location);
         this.station_id = id;
+        industries      = [];
 
         find_platforms();
+        find_industries();
     }
 }
 
@@ -176,32 +202,50 @@ function Station::get_cargo_types ()
 /*
  * look for relevant industries close to station - for feeding
  */
-function Station::find_industries (cargo_types)
+function Station::find_industries ()
 {
     Debug("Station::find_industries()");
 
     local cargo_types   = SL.Helper.GetRawCargo();
-    local industries    = AIList();
     local station_tile  = AIStation.GetLocation(station_id);
-    local max_dist      = 200;
+    local max_dist      = FEEDER_MAX_DISTANCE;
 
-    foreach (i, cargo in cargo_types)
+    foreach (cargo, _ in cargo_types)
     {
         local all = AIIndustryList_CargoProducing(cargo);
 
         foreach (industry, v in all)
         {
             local tile_index = AIIndustry.GetLocation(industry);
-            local dist = AIMap.ManhattanDistance(station_tile, tile_index);
+            local dist = AIMap.DistanceManhattan(station_tile, tile_index);
 
             if (dist < max_dist)
             {
-                industries.AddItem(industry, 0);
+                industries.push(Industry(industry));
             }
         }
     }
 
+    Info("found", industries.len(), "industries");
+
     return industries;
+}
+
+function Station::get_free_industry ()
+{
+    Debug("Station::get_free_industry()");
+
+    local found = null;
+
+    foreach (i, industry in industries)
+    {
+        if (industry.taken) continue;
+
+        found = industry.industry_id;
+        break;
+    }
+
+    return found;
 }
 
 function Station::recalculate ()
