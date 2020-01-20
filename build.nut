@@ -18,10 +18,10 @@ function find_industry_station_site (industry)
          tile = area.Next())
     {
         local can_build = IsBuildableRectangle(tile,
-                                               Rotation.ROT_90,
+                                               Rotation.ROT_0,
                                                [0, 0],
                                                [2, platlen],
-                                               false);
+                                               true);
 		area.SetValue(tile, can_build ? 1 : 0);
 	}
 	

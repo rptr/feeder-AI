@@ -119,6 +119,7 @@ function TaskFeedLine::run ()
         if (subtask.run() != TaskReturnState.DONE)
         {
             // TODO undo everything
+            industry.skip = true;
             return TaskReturnState.ERROR;
         }
     }
@@ -160,11 +161,52 @@ function TaskBuildFeedStation::run ()
     local platlen   = FEEDER_PLATFORM_MAX_LENGTH;
     local direction = AIRail.RAILTRACK_NE_SW;
 
-	AIRail.BuildRailStation(entrance_tile_index, 
+	local success = AIRail.BuildRailStation(entrance_tile_index, 
                             direction, 
                             1, 
                             platlen, 
                             AIStation.STATION_NEW);
+
+    if (!success)
+    {
+        switch (AIError.GetLastError())
+        {
+            case AIError.ERR_NOT_ENOUGH_CASH:
+                Warning("not enough cash");
+                break;
+
+            case AIError.ERR_OWNED_BY_ANOTHER_COMPANY:
+                Warning("owned by other company");
+                break;
+
+            case AIError.ERR_AREA_NOT_CLEAR:
+                Warning("area not clear");
+                break;
+
+            case AIError.ERR_FLAT_LAND_REQUIRED:
+                Warning("flat land required");
+                break;
+
+            case AIStation.ERR_STATION_TOO_CLOSE_TO_ANOTHER_STATION:
+                Warning("station too close to other station");
+                break;
+
+            case AIStation.ERR_STATION_TOO_MANY_STATIONS:
+                Warning("too_many_stations");
+                break;
+
+            case AIStation.ERR_STATION_TOO_MANY_STATIONS_IN_TOWN:
+                Warning("too many stations in town");
+                break;
+
+            default:
+                Warning("can't place station for unhandled reason");
+                break;
+        }
+
+        return TaskReturnState.ERROR;
+    }
+
     new_id = AIStation.GetStationID(entrance_tile_index);
     Feeder.plan.register_station(new_id);
 
@@ -208,6 +250,9 @@ function TaskBuildTrack::run ()
 {
     Info("TaskBuildTrack::run()");
 
+    SL.Helper.SetSign(source_tile_id, "from here");
+    SL.Helper.SetSign(target_tile_id, "to  here");
+
     local path;
     local dir1 = SL.Direction.OppositeDir(source_direction);
     local prev1 = SL.Direction.GetAdjacentTileInDirection(
@@ -231,7 +276,7 @@ function TaskBuildTrack::run ()
     Feeder.pathfinder.InitializePath([source], [target]);
     path = Feeder.pathfinder.FindPath(2000);
 
-    if (path == null)
+    if (path == null || path == false)
     {
         Warning("can't find path");
         return TaskReturnState.ERROR;
@@ -255,7 +300,7 @@ function TaskBuildTrack::run ()
             {
                 if (!AIRail.BuildRail(prevprev, prev, path.GetTile()))
                 {
-                    Debug("can't place rail");
+                    Warning("can't place rail");
                     return TaskReturnState.ERROR;
                 }
             }
@@ -263,6 +308,7 @@ function TaskBuildTrack::run ()
 
         if (path == false)
         {
+            Warning("unknown path failure");
             return TaskReturnState.ERROR;
         }
 

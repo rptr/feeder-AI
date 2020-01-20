@@ -71,6 +71,7 @@ class Industry extends WorldObject
 {
     industry_id     = null;
     taken           = null;
+    skip            = null;
 
     constructor (id)
     {
@@ -87,6 +88,7 @@ class Industry extends WorldObject
 		WorldObject.constructor(location);
         industry_id = id;
         taken       = false;
+        skip        = false;
     }
 }
 
@@ -247,7 +249,7 @@ function Station::get_free_industry ()
 
     foreach (i, industry in industries)
     {
-        if (industry.taken) continue;
+        if (industry.taken || industry.skip) continue;
 
         found = industry;
         break;
