@@ -410,3 +410,40 @@ class Flag {
 	}
 }
 
+function CheckError() {
+    switch (AIError.GetLastError()) {
+        case AIError.ERR_NONE:
+        case AIError.ERR_ALREADY_BUILT:
+        case AITile.ERR_AREA_ALREADY_FLAT:
+            return;
+
+        case AIError.ERR_UNKNOWN:
+            errUnknownCount++
+            PrintError();
+            Warning("ERR_UNKNOWN #" + errUnknownCount);
+            throw errUnknownCount < MAX_ERR_UNKNOWN ? TaskRetryException() : TaskFailedException("too many ERR_UNKNOWN");
+                        
+        case AIError.ERR_NOT_ENOUGH_CASH:
+            costEstimate *= 2;
+            throw NeedMoneyException(costEstimate);
+            
+        case AIError.ERR_VEHICLE_IN_THE_WAY:
+            errRetryCount++;
+            throw errRetryCount < MAX_RETRY ? TaskRetryException() : TaskFailedException("too many retries");
+        
+        case AIError.ERR_PRECONDITION_FAILED:
+        case AIError.ERR_PRECONDITION_STRING_TOO_LONG:
+        case AIError.ERR_NEWGRF_SUPPLIED_ERROR:
+        case AIError.ERR_LOCAL_AUTHORITY_REFUSES:
+        case AIError.ERR_AREA_NOT_CLEAR:
+        case AIError.ERR_OWNED_BY_ANOTHER_COMPANY:
+        case AIError.ERR_NAME_IS_NOT_UNIQUE:
+        case AIError.ERR_FLAT_LAND_REQUIRED:
+        case AIError.ERR_LAND_SLOPED_WRONG:
+        case AIError.ERR_SITE_UNSUITABLE:
+        case AIError.ERR_TOO_CLOSE_TO_EDGE:
+        case AIError.ERR_STATION_TOO_SPREAD_OUT:
+        default:
+            throw TaskFailedException(AIError.GetLastErrorString());
+    }
+}
