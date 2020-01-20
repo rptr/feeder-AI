@@ -1,6 +1,18 @@
 require("world.nut");
 require("tiles.nut");
 
+class EntranceTile extends WorldObject
+{
+    tile_index      = null;
+    direction       = null;
+
+    constructor (tile, dir)
+    {
+        tile_index  = tile;
+        direction   = dir;
+    }
+}
+
 class Platform extends WorldObject
 {
     orientation     = null;
@@ -53,10 +65,20 @@ function Platform::calculate_entrance_tiles ()
 {
     Debug("Platform::calculate_entrance_tiles()");
 
+    local temp = [];
+
     foreach (i, tile in tiles)
     {
-        local entrance = railstation_get_free_connectable_tiles(tile);
-        entrance_tiles.extend(entrance);
+        local tile_indices = railstation_get_free_connectable_tiles(tile);
+        temp.extend(tile_indices);
+    }
+
+    // EPPPE
+    // E: entrance, P: platform
+    foreach (i, tile in temp)
+    {
+        local dir = SL.Direction.GetDirectionToTile(tiles[0], tile);
+        entrance_tiles.push(EntranceTile(tile, dir));
     }
 
     Debug("found", entrance_tiles.len(), "entrance tiles");
@@ -65,6 +87,11 @@ function Platform::calculate_entrance_tiles ()
 function Platform::reserve ()
 {
     attached += 1;
+}
+
+function Platform::get_entrance ()
+{
+    return entrance_tiles[0];
 }
 
 class Industry extends WorldObject
