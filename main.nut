@@ -116,6 +116,8 @@ class Feeder extends AIController
 
 function Feeder::Start ()
 {
+    SL.Helper.ClearAllSigns();
+
     local types = AIRailTypeList();
     AIRail.SetCurrentRailType(types.Begin());
 
@@ -181,6 +183,8 @@ function Feeder::MainLoop ()
         local task = tasks[0];
         Debug("Running: " + task);
         local res = task.run();
+
+        SL.Helper.ClearAllSigns();
 
         if (res == TaskReturnState.UNFINISHED)
         {
