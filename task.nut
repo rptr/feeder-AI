@@ -67,11 +67,11 @@ function TaskFeedLine::run ()
         return TaskReturnState.ERROR;
     }
 
-    local station_id = big_station.station_id;
-    local tiles = platform.entrance_tiles;
-    local target_tile_index = tiles[0];
-
-    local cargoes = big_station.get_cargo_types();
+    local station_id        = big_station.station_id;
+    local entrance          = platform.get_entrance();
+    local target_tile_index = entrance.tile_index;
+    local target_direction  = entrance.direction;
+    local cargoes           = big_station.get_cargo_types();
 
     // TEMP -- get this info from the station instead
     local all_cargo = SL.Helper.GetRawCargo();
@@ -103,13 +103,12 @@ function TaskFeedLine::run ()
     }
 
     local dir = SL.Direction.DIR_NE;
-    local dir2 = SL.Direction.DIR_NE;
 
     subtasks = 
         [
         TaskBuildFeedStation(source_tile_index),
         TaskBuildTrack(source_tile_index, dir,
-                       target_tile_index, dir2)
+                       target_tile_index, target_direction)
         ];
 
     Debug("run subtasks");
