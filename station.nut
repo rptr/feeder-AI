@@ -90,6 +90,11 @@ class Industry extends WorldObject
     }
 }
 
+function Industry::reserve ()
+{
+    taken = true;
+}
+
 class Station extends WorldObject
 {
     station_id      = null;
@@ -241,7 +246,7 @@ function Station::get_free_industry ()
     {
         if (industry.taken) continue;
 
-        found = industry.industry_id;
+        found = industry;
         break;
     }
 
