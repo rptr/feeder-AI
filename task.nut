@@ -84,14 +84,15 @@ function TaskFeedLine::run ()
         return TaskReturnState.ERROR;
     }
 
-    local industry_id = big_station.get_free_industry();
+    local industry = big_station.get_free_industry();
 
-    if (null == industry_id)
+    if (null == industry)
     {
         Warning("no available industries");
         return TaskReturnState.ERROR;
     }
 
+    local industry_id = industry.industry_id;
     local source_tile_index = find_industry_station_site(industry_id);
 
     if (source_tile_index == null)
@@ -123,6 +124,7 @@ function TaskFeedLine::run ()
 
     // make it so it doesn't have free tiles anymore
     platform.reserve();
+    industry.reserve();
     /* big_station.recalculate(); */
 
     return TaskReturnState.DONE;
@@ -256,6 +258,11 @@ function TaskBuildTrack::run ()
                     return TaskReturnState.ERROR;
                 }
             }
+        }
+
+        if (path == false)
+        {
+            return TaskReturnState.ERROR;
         }
 
         if (path != null)
